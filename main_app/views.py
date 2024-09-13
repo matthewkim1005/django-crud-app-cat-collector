@@ -1,12 +1,12 @@
 from django.shortcuts import render, redirect
-from .models import Cat
+from .models import Cat, Toy
 from .forms import FeedingForm
-from django.views.generic import ListView
+from django.views.generic import ListView, DetailView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 
 class CatCreate(CreateView):
     model = Cat
-    fields = '__all__'
+    fields = ['name', 'breed', 'description', 'age']
     success_url = '/cats/'
     #^ same as: fields = ['name', 'breed', 'description', 'age']
 
@@ -18,6 +18,24 @@ class CatUpdate(UpdateView):
 class CatDelete(DeleteView):
     model = Cat
     success_url = '/cats/'
+
+class ToyCreate(CreateView):
+    model = Toy
+    fields = '__all__'
+
+class ToyList(ListView):
+    model = Toy
+
+class ToyDetail(DetailView):
+    model = Toy
+
+class ToyUpdate(UpdateView):
+    model = Toy
+    fields = ['name', 'color']
+
+class ToyDelete(DeleteView):
+    model = Toy
+    success_url = '/toys/'
 
 def home(request):
     return render(request, 'base.html')
@@ -34,11 +52,12 @@ def home(request):
 
 def cat_detail(request, cat_id):
     cat = Cat.objects.get(id=cat_id)
-    # instantiate FeedingForm to be rendered in the template
+    toys_cat_doesnt_have = Toy.objects.exclude(id__in = cat.toys.all().values_list('id'))
     feeding_form = FeedingForm()
     return render(request, 'cats/detail.html', {
-        # include the cat and feeding_form in the context
-        'cat': cat, 'feeding_form': feeding_form
+        'cat': cat,
+        'feeding_form': feeding_form,
+        'toys': toys_cat_doesnt_have  # send those toys
     })
 
 def add_feeding(request, cat_id):
@@ -52,3 +71,14 @@ def add_feeding(request, cat_id):
         new_feeding.cat_id = cat_id
         new_feeding.save()
     return redirect('cat-detail', cat_id=cat_id)
+
+def associate_toy(request, cat_id, toy_id):
+    # Note that you can pass a toy's id instead of the whole object
+    Cat.objects.get(id=cat_id).toys.add(toy_id)
+    return redirect('cat-detail', cat_id=cat_id)
+
+def remove_toy(request, cat_id, toy_id):
+    # Look up the cat
+    # Look up the toy
+    # Remove the toy from the cat
+    return redirect('cat-detail', cat_id=cat.id)
