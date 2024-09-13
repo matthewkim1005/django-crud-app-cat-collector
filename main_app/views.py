@@ -78,7 +78,7 @@ def associate_toy(request, cat_id, toy_id):
     return redirect('cat-detail', cat_id=cat_id)
 
 def remove_toy(request, cat_id, toy_id):
-    # Look up the cat
-    # Look up the toy
-    # Remove the toy from the cat
-    return redirect('cat-detail', cat_id=cat.id)
+    # cat = Cat.objects.get(id=cat_id)
+    # toy = Toy.objects.get(id=toy_id)
+    Cat.objects.get(id=cat_id).toys.remove(toy_id)
+    return redirect('cat-detail', cat_id=cat_id)
